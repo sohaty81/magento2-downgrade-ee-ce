@@ -350,20 +350,56 @@ ALTER TABLE `catalog_product_entity_varchar`
     DROP COLUMN `row_id`;
 
 -- Gallery value to entity
+RENAME TABLE catalog_product_entity_media_gallery_value_to_entity TO catalog_product_entity_media_gallery_value_to_entity_old;
+
+CREATE TABLE `catalog_product_entity_media_gallery_value_to_entity` (
+     `value_id` int(10) unsigned NOT NULL COMMENT 'Value media Entry ID',
+     `entity_id` int(10) unsigned NOT NULL COMMENT 'Version Id',
+     UNIQUE KEY `CAT_PRD_ENTT_MDA_GLR_VAL_TO_ENTT_VAL_ID_ENTT_ID` (`value_id`,`entity_id`)
+     #CONSTRAINT `FK_A6C6C8FAA386736921D3A7C4B50B1185` FOREIGN KEY (`value_id`) REFERENCES `catalog_product_entity_media_gallery` (`value_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Link Media value to Product entity table';
+
+INSERT INTO catalog_product_entity_media_gallery_value_to_entity (`value_id`, `entity_id`)
+ SELECT `value_id`,`row_id` FROM catalog_product_entity_media_gallery_value_to_entity_old;
+
+DROP TABLE catalog_product_entity_media_gallery_value_to_entity_old;
+
+/*
 ALTER TABLE `catalog_product_entity_media_gallery_value_to_entity`
     DROP FOREIGN KEY `CAT_PRD_ENTT_MDA_GLR_VAL_TO_ENTT_ROW_ID_CAT_PRD_ENTT_ROW_ID`,
     DROP INDEX `CAT_PRD_ENTT_MDA_GLR_VAL_TO_ENTT_ROW_ID_CAT_PRD_ENTT_ROW_ID`,
     ADD CONSTRAINT `CAT_PRD_ENTT_MDA_GLR_VAL_TO_ENTT_VAL_ID_ENTT_ID` UNIQUE KEY (`value_id`,`entity_id`),
 	DROP COLUMN `row_id`;
+*/
+
 
 -- Gallery value
+
 ALTER TABLE `catalog_product_entity_media_gallery_value`
+    DROP FOREIGN KEY `CAT_PRD_ENTT_MDA_GLR_VAL_ROW_ID_CAT_PRD_ENTT_ROW_ID`;
+
+ALTER TABLE `catalog_product_entity_media_gallery_value`
+    DROP INDEX `CATALOG_PRODUCT_ENTITY_MEDIA_GALLERY_VALUE_ROW_ID`;
+
+/*ALTER TABLE `catalog_product_entity_media_gallery_value`
+    DROP INDEX `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID`;*/
+
+ALTER TABLE `catalog_product_entity_media_gallery_value`
+    ADD INDEX `CATALOG_PRODUCT_ENTITY_MEDIA_GALLERY_VALUE_ENTITY_ID` (`entity_id`);
+
+ALTER TABLE `catalog_product_entity_media_gallery_value`
+    ADD CONSTRAINT `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID` UNIQUE KEY (`entity_id`, `value_id`, `store_id`);
+
+ALTER TABLE `catalog_product_entity_media_gallery_value`
+    DROP COLUMN `row_id`;
+
+/*ALTER TABLE `catalog_product_entity_media_gallery_value`
     DROP FOREIGN KEY `CAT_PRD_ENTT_MDA_GLR_VAL_ROW_ID_CAT_PRD_ENTT_ROW_ID`,
     DROP INDEX `CATALOG_PRODUCT_ENTITY_MEDIA_GALLERY_VALUE_ROW_ID`,
 	DROP INDEX `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID`,
     ADD INDEX `CATALOG_PRODUCT_ENTITY_MEDIA_GALLERY_VALUE_ENTITY_ID` (`entity_id`),
     ADD CONSTRAINT `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID` UNIQUE KEY (`entity_id`,`value_id`,`store_id`),
-	DROP COLUMN `row_id`;
+	DROP COLUMN `row_id`;*/
 
 -- Gallery
 ALTER TABLE `catalog_product_entity_gallery`
@@ -392,6 +428,15 @@ ALTER TABLE `catalog_product_entity`
     MODIFY COLUMN `entity_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Entity ID',
     ADD PRIMARY KEY (`entity_id`);
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+DELETE FROM `catalog_product_entity_media_gallery_value_to_entity` WHERE `entity_id` IN(
+SELECT `gal`.`entity_id`
+FROM `catalog_product_entity` as `prod`
+         RIGHT JOIN  `catalog_product_entity_media_gallery_value_to_entity` as `gal`
+                     ON `prod`.`entity_id` = `gal`.`entity_id`  WHERE `prod`.`entity_id` IS NULL
+);
+
 
 -- Foreign keys
 ALTER TABLE `catalog_product_entity_datetime`
@@ -505,4 +550,6 @@ ALTER TABLE `wishlist_item`
     DROP FOREIGN KEY `WISHLIST_ITEM_PRODUCT_ID_SEQUENCE_PRODUCT_SEQUENCE_VALUE`,
     ADD CONSTRAINT `WISHLIST_ITEM_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID` FOREIGN KEY (`product_id`) REFERENCES `catalog_product_entity` (`entity_id`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
+ALTER TABLE `email_catalog`
+    DROP FOREIGN KEY `EMAIL_CATALOG_PRODUCT_ID_SEQUENCE_PRODUCT_SEQUENCE_VALUE`;
 DROP TABLE `sequence_product_bundle_selection`,`sequence_product_bundle_option`,`sequence_product`;
