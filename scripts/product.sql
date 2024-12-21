@@ -269,7 +269,7 @@ ALTER TABLE `catalog_product_bundle_option`
     DROP PRIMARY KEY,
     DROP COLUMN `parent_id`,
     CHANGE COLUMN `new_parent_id` `parent_id` INT(10) UNSIGNED NOT NULL COMMENT 'Parent ID',
-    ADD CONSTRAINT `CATALOG_PRODUCT_BUNDLE_OPTION_PARENT_ID` UNIQUE KEY (`parent_id`),
+    #ADD CONSTRAINT `CATALOG_PRODUCT_BUNDLE_OPTION_PARENT_ID` UNIQUE KEY (`parent_id`),
     MODIFY COLUMN `option_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Option ID',
     ADD PRIMARY KEY (`option_id`);
 
@@ -387,8 +387,9 @@ ALTER TABLE `catalog_product_entity_media_gallery_value`
 ALTER TABLE `catalog_product_entity_media_gallery_value`
     ADD INDEX `CATALOG_PRODUCT_ENTITY_MEDIA_GALLERY_VALUE_ENTITY_ID` (`entity_id`);
 
-ALTER TABLE `catalog_product_entity_media_gallery_value`
-    ADD CONSTRAINT `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID` UNIQUE KEY (`entity_id`, `value_id`, `store_id`);
+# te-fix maybe Sohaty
+#ALTER TABLE `catalog_product_entity_media_gallery_value`
+#    ADD CONSTRAINT `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID` UNIQUE KEY (`entity_id`, `value_id`, `store_id`);
 
 ALTER TABLE `catalog_product_entity_media_gallery_value`
     DROP COLUMN `row_id`;
@@ -553,3 +554,13 @@ ALTER TABLE `wishlist_item`
 ALTER TABLE `email_catalog`
     DROP FOREIGN KEY `EMAIL_CATALOG_PRODUCT_ID_SEQUENCE_PRODUCT_SEQUENCE_VALUE`;
 DROP TABLE `sequence_product_bundle_selection`,`sequence_product_bundle_option`,`sequence_product`;
+
+# --- te-fix ---
+
+#ALTER TABLE `catalog_product_entity_media_gallery_value`
+#    DROP INDEX `CAT_PRD_ENTT_MDA_GLR_VAL_ENTT_ID_VAL_ID_STORE_ID`;
+
+#ALTER TABLE `email_catalog`
+#    DROP FOREIGN KEY `CAT_PRD_BNDL_OPT_PARENT_ID_CAT_PRD_ENTT_ROW_ID`;
+#ALTER TABLE `catalog_product_bundle_option`
+#    DROP INDEX `CATALOG_PRODUCT_BUNDLE_OPTION_PARENT_ID`;

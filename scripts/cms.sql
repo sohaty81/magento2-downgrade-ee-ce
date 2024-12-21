@@ -1,5 +1,6 @@
 -- Drop Custom table with external module foreign key
-DROP TABLE convert_product_cms_block;
+#te-fix
+#DROP TABLE convert_product_cms_block;
 DROP TABLE convert_category_cms_block;
 
 
@@ -60,7 +61,18 @@ ALTER TABLE `cms_block`
     MODIFY COLUMN `block_id` SMALLINT(6) NOT NULL AUTO_INCREMENT COMMENT 'Entity ID';
 SET FOREIGN_KEY_CHECKS = 1;
 
-DELETE FROM magento.cms_page_store WHERE page_id = 0;
+/*te-fix Drop duplicate pages*/
+#DELETE FROM magento.cms_page_store WHERE page_id = 0;
+UPDATE `cms_page_store`
+SET `page_id` = `row_id`
+where `page_id` = 0;
+
+DELETE FROM `cms_page_store`
+WHERE `page_id` NOT IN (
+    SELECT `page_id`
+    FROM `cms_page`
+);
+
 -- Update the `page_id` relation link for page store
 ALTER TABLE `cms_page_store`
     DROP FOREIGN KEY `CMS_PAGE_STORE_ROW_ID_CMS_PAGE_ROW_ID`,
